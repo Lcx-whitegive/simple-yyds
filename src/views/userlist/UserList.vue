@@ -373,7 +373,7 @@ export default {
           deleteUserById(id)
             .then(res => {
               if(res.meta.status == 200){
-                this.$message.success('删除成功')
+                this.$message.success('删除成功!')
                 this.getUserList()
               }
             })
