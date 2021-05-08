@@ -50,3 +50,14 @@ export const deleteUserById = (id) => {
         url: `/users/${id}`
     })
 }
+
+// 给用户分配角色
+export const sendRole = (id, role_id) => {
+    return request({
+        method: 'put',
+        url: `users/${id}/role`,
+        data: {
+            rid: role_id
+        }
+    })
+}

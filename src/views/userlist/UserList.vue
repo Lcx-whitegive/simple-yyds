@@ -1,18 +1,19 @@
 <template>
   <div>
     <el-card>
+      <!-- 搜索区域 -->
       <el-row :gutter="30">
         <el-col :span="8">
           <el-input
             placeholder="请输入内容"
             v-model="queryInfo.query"
             clearable
-            @clear="getUserList"
+            @clear="clear"
           >
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getUserList"
+              @click="search"
             ></el-button>
           </el-input>
         </el-col>
@@ -71,6 +72,7 @@
                 type="warning"
                 icon="el-icon-setting"
                 size="mini"
+                @click="showAuthDialog(data.row)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -171,6 +173,34 @@
           >
         </span>
       </el-dialog>
+      <!-- 分配角色弹框 -->
+      <el-dialog
+        title="分配角色"
+        :visible.sync="authDialogVisible"
+        width="60%"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+      >
+        <el-form :model="roleForm" ref="roleFormRef" :disabled='isDialogLoading'>
+          <el-form-item label="用户名" :label-width="formLabelWidth">
+            <el-input v-model="roleForm.username" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="当前角色" :label-width="formLabelWidth">
+            <el-input v-model="roleForm.role_name" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="分配新角色" :label-width="formLabelWidth">
+            <el-select v-model="roleForm.role_id" placeholder="请选择">
+              <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="authDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="sendRole" :loading='isDialogLoading'
+            >分 配</el-button
+          >
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -182,8 +212,10 @@ import {
   addUser,
   getUserById,
   editUser,
-  deleteUserById
+  deleteUserById,
+  sendRole
 } from "network/users";
+import { getRolesList } from "network/auth";
 
 export default {
   name: "UserList",
@@ -267,8 +299,15 @@ export default {
           },
         ],
       },
-      formLabelWidth: "80px",
+      formLabelWidth: "100px",
       isDialogLoading: false,
+      authDialogVisible: false,
+      roleForm: {
+        username: "",
+        role_name: "",
+        role_id:''
+      },
+      roleList: [],
     };
   },
   methods: {
@@ -276,7 +315,6 @@ export default {
     getUserList() {
       getUserList(this.queryInfo).then((res) => {
         if (res.meta.status == 200) {
-          console.log(res);
           this.userList = res.data.users;
           this.total = res.data.total;
         }
@@ -370,24 +408,65 @@ export default {
         type: "warning",
       })
         .then(() => {
-          deleteUserById(id)
-            .then(res => {
-              if(res.meta.status == 200){
-                this.$message.success('删除成功!')
-                this.getUserList()
-              }
-            })
+          deleteUserById(id).then((res) => {
+            if (res.meta.status == 200) {
+              this.$message.success("删除成功!");
+              this.getUserList();
+            }
+          });
         })
         .catch(() => {
           this.$message({
             type: "info",
             message: "已取消删除",
-          })
+          });
+        });
+    },
+    // 展示分配角色弹框
+    showAuthDialog(role) {
+      this.authDialogVisible = true;
+      this.roleForm = role;
+    },
+    // 获取角色列表
+    getRolesList() {
+      getRolesList().then((res) => {
+        if(res.meta.status == 200){
+          this.roleList = res.data
+        }else{
+          this.$message.error('获取角色列表失败')
+        }
+      });
+    },
+    // 分配角色
+    sendRole() {
+      this.isDialogLoading = true
+      sendRole(this.roleForm.id, this.roleForm.role_id)
+        .then(res => {
+          if(res.meta.status == 200){
+            this.$message.success('更新用户角色成功')
+            this.getUserList()
+          }else{
+            this.$message.error('更新用户角色失败')
+          }
+        }).finally(() => {
+          this.isDialogLoading = false
+          this.authDialogVisible = false
         })
     },
+    // 搜索用户
+    search() {
+      this.queryInfo.pagenum = 1
+      this.getUserList()
+    },
+    // 清空搜索框
+    clear() {
+      this.queryInfo.pagenum = 1
+      this.getUserList()
+    }
   },
   mounted() {
     this.getUserList();
+    this.getRolesList();
   },
 };
 </script>

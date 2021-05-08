@@ -46,6 +46,46 @@ const routes = [
             component: () => import('views/userlist/UserList'),
           }
         ]
+      },
+      {
+        // 权限列表页路由
+        path: '/rights',
+        component: () => import('views/rights/Rights'),
+      },
+      {
+        // 角色列表页路由
+        path: '/roles',
+        component: () => import('views/roles/Roles'),
+      },
+      {
+        // 商品分类页路由
+        path: '/categories',
+        component: () => import('views/categories/Categories'),
+      },
+      {
+        // 商品列表页路由
+        path: '/goods',
+        component: () => import('views/goods/Goods'),
+      },
+      {
+        // 商品参数页路由
+        path: '/params',
+        component: () => import('views/params/Params'),
+      },
+      {
+        // 添加商品页路由
+        path: '/goods/add',
+        component: () => import('views/addgoods/AddGoods'),
+      },
+      {
+        // 订单列表页路由
+        path: '/orders',
+        component: () => import('views/orders/Orders'),
+      },
+      {
+        // 报表页路由
+        path: '/reports',
+        component: () => import('views/reports/Reports'),
       }
     ]
   }

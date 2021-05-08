@@ -56,4 +56,7 @@ ul, ol, dl {
 .right {
   float: right;
 }
+.ql-editor {
+  min-height: 300px;
+}
 
